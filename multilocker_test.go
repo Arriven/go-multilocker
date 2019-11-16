@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func lockTwoMutexes(l1 Lock, l2 Lock) {
+func lockTwoMutexes(l1 Lockable, l2 Lockable) {
 	var l Locker
 	l.Lock(l1, l2)
 	defer l.Unlock()

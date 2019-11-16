@@ -4,22 +4,31 @@ import (
 	"runtime"
 )
 
-type Lock interface {
+//Lock defines minimal interface for types that are supported
+type Lockable interface {
 	TryLock() bool
 	Unlock()
 }
 
+//Locker is a struct used for locking/unlocking
+//It's possible to implement with free functions but the code will become more complex.
+//Feel free to make a PR if you need such functionality
 type Locker struct {
-	locks []Lock
+	locks []Lockable
 }
 
-func (l *Locker) Lock(locks ...Lock) {
+//Lock is a function that locks all resources provided.
+//It's guaranteed to avoid deadlock but might potentially fail into livelock.
+//If a panic is thrown during locking of one of the resouces it'll unlock all the acquired resources.
+func (l *Locker) Lock(locks ...Lockable) {
 	for !l.TryLock(locks...) {
 		runtime.Gosched()
 	}
 }
 
-func (l *Locker) TryLock(locks ...Lock) bool {
+//TryLock tries to acquire all provided resources.
+//If a panic is thrown during locking of one of the resouces it'll unlock all the acquired resources.
+func (l *Locker) TryLock(locks ...Lockable) bool {
 	defer l.unlockOnPanic()
 	for _, lock := range locks {
 		if lock.TryLock() {
@@ -32,6 +41,7 @@ func (l *Locker) TryLock(locks ...Lock) bool {
 	return true
 }
 
+//Unlock just releases all acquired resources
 func (l *Locker) Unlock() {
 	for _, lock := range l.locks {
 		lock.Unlock()
