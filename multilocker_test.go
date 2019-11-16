@@ -28,9 +28,8 @@ func TestTwoResourcesReverseOrder(t *testing.T) {
 type panickingMutex struct {
 }
 
-func (m *panickingMutex) TryLock() bool {
+func (m *panickingMutex) Lock() {
 	panic("wtf")
-	return true
 }
 
 func (m *panickingMutex) Unlock() {}
@@ -44,7 +43,7 @@ func TestPanicBehavior(t *testing.T) {
 			t.Log("recovered from panic")
 		}
 	}()
-	l.TryLock(&m, &p)
+	l.Lock(&m, &p)
 	if !l.TryLock(&m) {
 		t.Fail()
 	}
