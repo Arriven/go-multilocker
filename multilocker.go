@@ -6,7 +6,7 @@ import (
 	"sort"
 )
 
-//Lock defines minimal interface for types that are supported
+//Lockable defines minimal interface for types that are supported
 type Lockable interface {
 	TryLock() bool
 	Unlock()
