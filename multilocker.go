@@ -2,6 +2,8 @@ package multilocker
 
 import (
 	"runtime"
+	"unsafe"
+	"sort"
 )
 
 //Lock defines minimal interface for types that are supported
@@ -30,6 +32,7 @@ func (l *Locker) Lock(locks ...Lockable) {
 //If a panic is thrown during locking of one of the resouces it'll unlock all the acquired resources.
 func (l *Locker) TryLock(locks ...Lockable) bool {
 	defer l.unlockOnPanic()
+	sort.Slice(locks, func(i, j int) bool { return uintptr(unsafe.Pointer(&locks[i])) < uintptr(unsafe.Pointer(&locks[j])) })
 	for _, lock := range locks {
 		if lock.TryLock() {
 			l.locks = append(l.locks, lock)
